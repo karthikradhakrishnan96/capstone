@@ -1,0 +1,7 @@
+
+/model.tar
+/ours/reddit-init/
+/ours/2018-02.threads.sample.json
+.idea
+.DS_Store
+ __pycache__/

@@ -1,4 +1,6 @@
-from convokit import Corpus, download, loadPrecomputedVoc
+import json
+
+from convokit import Corpus, download
 from consts import *
 from modeling import EncoderRNN, ContextEncoderRNN, SingleTargetClf, Predictor
 from train_test_utils import evaluateDataset
@@ -10,8 +12,16 @@ import os
 import random
 from urllib.request import urlretrieve
 
-corpus = Corpus(filename=download("conversations-gone-awry-corpus"))
+from vocabulary import loadPrecomputedVoc
 
+# corpus = Corpus(filename=download("conversations-gone-awry-corpus"))
+corpus = Corpus("./ours/reddit-init/utterances.jsonl")
+with open('./ours/reddit-init/convo_meta.json') as f:
+    conv_meta = json.load(f)
+
+for convo in corpus.iter_conversations():
+    first_id = convo.get_utterance_ids()[0]
+    convo.meta.update(conv_meta[first_id])
 
 # let's check some quick stats to verify that the corpus loaded correctly
 print("Corpus has utts: ", len(corpus.get_utterance_ids()))
@@ -24,10 +34,8 @@ print("Voc has: ", voc.num_words) # expected vocab size is 50004: it was built u
 print("W2I: ", list(voc.word2index.items())[:10])
 print("I2W: ", list(voc.index2word.items())[:10])
 
-test_pairs = loadPairs(voc, corpus, "test")
-
-
-
+test_pairs = loadPairs(voc, corpus, "init")
+print(sorted([a[-1] for a in test_pairs]))
 # Fix random state for reproducibility
 random.seed(2019)
 
@@ -40,7 +48,7 @@ if not os.path.isfile("model.tar"):
     print("\tDownloading trained CRAFT...")
     urlretrieve(MODEL_URL, "model.tar")
     print("\t...Done!")
-checkpoint = torch.load("model.tar")
+checkpoint = torch.load("model.tar", map_location=torch.device('cpu'))
 # If running in a non-GPU environment, you need to tell PyTorch to convert the parameters to CPU tensor format.
 # To do so, replace the previous line with the following:
 #checkpoint = torch.load("model.tar", map_location=torch.device('cpu'))
@@ -78,3 +86,5 @@ predictor = Predictor(encoder, context_encoder, attack_clf)
 
 # Run the pipeline!
 forecasts_df = evaluateDataset(test_pairs, encoder, context_encoder, predictor, voc, batch_size, device)
+forecasts_df.to_csv(out_file_name, sep=',')
+

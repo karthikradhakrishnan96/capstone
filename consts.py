@@ -29,3 +29,4 @@ MODEL_URL = "http://zissou.infosci.cornell.edu/convokit/models/craft_wikiconv/cr
 # confidence score threshold for declaring a positive prediction.
 # this value was previously learned on the validation set.
 FORECAST_THRESH = 0.570617
+out_file_name = './preds.csv'

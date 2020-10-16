@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+import torch.nn.functional as F
 
 class EncoderRNN(nn.Module):
     """This module represents the utterance encoder component of CRAFT, responsible for creating vector representations of utterances"""
