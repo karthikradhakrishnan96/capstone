@@ -1,6 +1,10 @@
+from urllib.request import urlretrieve
+
 import torch
 from torch import nn
-import torch.nn.functional as F
+from consts import *
+from vocabulary import loadPrecomputedVoc
+import os
 
 class EncoderRNN(nn.Module):
     """This module represents the utterance encoder component of CRAFT, responsible for creating vector representations of utterances"""
@@ -114,9 +118,8 @@ class Predictor(nn.Module):
         # Forward pass through classifier to get prediction logits
         logits = self.classifier(context_encoder_outputs, dialog_lengths)
 
-        # Apply sigmoid activation
-        predictions = F.sigmoid(logits)
-        return predictions
+
+        return logits
 
 
 def makeContextEncoderInput(utt_encoder_hidden, dialog_lengths, batch_size, batch_indices, dialog_indices):
@@ -142,3 +145,40 @@ def makeContextEncoderInput(utt_encoder_hidden, dialog_lengths, batch_size, batc
     # finally, condense all the dialog tensors into a single zero-padded tensor
     # of shape [max_dialog_length, batch_size, hidden_size]
     return torch.nn.utils.rnn.pad_sequence(states_dialog_batched)
+
+def make_model(model_file = None):
+    device = 'cpu' if not torch.cuda.is_available() else 'cuda'
+    voc = loadPrecomputedVoc("wikiconv", WORD2INDEX_URL, INDEX2WORD_URL)
+    embedding = nn.Embedding(voc.num_words, hidden_size)
+    # Initialize utterance and context encoders
+    encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
+    context_encoder = ContextEncoderRNN(hidden_size, context_encoder_n_layers, dropout)
+    # Initialize classifier
+    attack_clf = SingleTargetClf(hidden_size, dropout)
+    # Use appropriate device
+    if model_file is not None:
+        print("Loading saved parameters...")
+        if not os.path.isfile(model_file):
+            print("\tDownloading trained CRAFT...", model_file)
+            urlretrieve(MODEL_URL, model_file)
+            print("\t...Done!")
+        checkpoint = torch.load(model_file, map_location=torch.device('cpu'))
+        # If running in a non-GPU environment, you need to tell PyTorch to convert the parameters to CPU tensor format.
+        # To do so, replace the previous line with the following:
+        # checkpoint = torch.load("model.tar", map_location=torch.device('cpu'))
+        encoder_sd = checkpoint['en']
+        context_sd = checkpoint['ctx']
+        attack_clf_sd = checkpoint['atk_clf']
+        embedding_sd = checkpoint['embedding']
+        voc.__dict__ = checkpoint['voc_dict']
+        embedding.load_state_dict(embedding_sd)
+        encoder.load_state_dict(encoder_sd)
+        context_encoder.load_state_dict(context_sd)
+        attack_clf.load_state_dict(attack_clf_sd)
+
+    context_encoder = context_encoder.to(device)
+    encoder = encoder.to(device)
+    attack_clf = attack_clf.to(device)
+    predictor = Predictor(encoder, context_encoder, attack_clf)
+    print('Models built and ready to go!')
+    return predictor, voc

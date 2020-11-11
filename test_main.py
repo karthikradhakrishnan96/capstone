@@ -14,14 +14,14 @@ from urllib.request import urlretrieve
 
 from vocabulary import loadPrecomputedVoc
 
-# corpus = Corpus(filename=download("conversations-gone-awry-corpus"))
-corpus = Corpus("./ours/reddit-init/utterances.jsonl")
-with open('./ours/reddit-init/convo_meta.json') as f:
-    conv_meta = json.load(f)
-
-for convo in corpus.iter_conversations():
-    first_id = convo.get_utterance_ids()[0]
-    convo.meta.update(conv_meta[first_id])
+corpus = Corpus(filename=download("conversations-gone-awry-corpus"))
+# corpus = Corpus("./ours/reddit-init/utterances.jsonl")
+# with open('./ours/reddit-init/convo_meta.json') as f:
+#     conv_meta = json.load(f)
+#
+# for convo in corpus.iter_conversations():
+#     first_id = convo.get_utterance_ids()[0]
+#     convo.meta.update(conv_meta[first_id])
 
 # let's check some quick stats to verify that the corpus loaded correctly
 print("Corpus has utts: ", len(corpus.get_utterance_ids()))
@@ -34,7 +34,7 @@ print("Voc has: ", voc.num_words) # expected vocab size is 50004: it was built u
 print("W2I: ", list(voc.word2index.items())[:10])
 print("I2W: ", list(voc.index2word.items())[:10])
 
-test_pairs = loadPairs(voc, corpus, "init")
+test_pairs = loadPairs(voc, corpus, "test")
 print(sorted([a[-1] for a in test_pairs]))
 # Fix random state for reproducibility
 random.seed(2019)
@@ -85,6 +85,6 @@ attack_clf.eval()
 predictor = Predictor(encoder, context_encoder, attack_clf)
 
 # Run the pipeline!
-forecasts_df = evaluateDataset(test_pairs, encoder, context_encoder, predictor, voc, batch_size, device)
+forecasts_df, _ = evaluateDataset(test_pairs, predictor, voc, batch_size)
 forecasts_df.to_csv(out_file_name, sep=',')
 

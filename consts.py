@@ -1,3 +1,5 @@
+import torch
+
 MAX_LENGTH = 80  # Maximum sentence length (number of tokens) to consider
 
 # configure model
@@ -14,7 +16,7 @@ learning_rate = 0.0001
 labeled_learning_rate = 1e-5
 decoder_learning_ratio = 5.0
 print_every = 10
-
+train_epochs = 30
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
@@ -29,4 +31,5 @@ MODEL_URL = "http://zissou.infosci.cornell.edu/convokit/models/craft_wikiconv/cr
 # confidence score threshold for declaring a positive prediction.
 # this value was previously learned on the validation set.
 FORECAST_THRESH = 0.570617
+device = 'cpu' if not torch.cuda.is_available() else 'cuda'
 out_file_name = './preds.csv'
