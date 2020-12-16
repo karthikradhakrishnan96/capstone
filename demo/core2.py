@@ -119,7 +119,7 @@ def loadPairs(voc, convo, rule_text):
 
 
 
-def toxicity(conversation, rule_text = 'No political opinions or hot takes or sensationalist controversies or tweets from president'):
+def toxicity(conversation, rule_text):
     pairs = loadPairs(voc, conversation, rule_text)
     if len(pairs) == 0:
         return 0

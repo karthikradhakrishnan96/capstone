@@ -137,6 +137,38 @@
         margin: 0 0 0 10px;
     }
 
+    .msger-rulearea {
+        display: flex;
+        padding: 10px;
+        border-top: var(--border);
+        background: #eee;
+    }
+
+    .msger-rulearea * {
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 1em;
+    }
+
+    .msger-rule {
+        flex: 1;
+        background: #ddd;
+    }
+
+    .msger-rule-confirm-btn {
+        margin-left: 10px;
+        background: rgb(0, 196, 65);
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.23s;
+    }
+
+    .msger-rule-confirm-btn:hover {
+        background: rgb(0, 180, 50);
+    }
+
     .msger-inputarea {
         display: flex;
         padding: 10px;
@@ -177,34 +209,48 @@
 </style>
 <script>
     conversation = [];
+    rule_text = "";
 
     function get_toxic() {
         conversation.push(document.getElementById("inp_box").value);
+        rule_text = document.getElementById("rule_box").value;
         fetch('http://127.0.0.1:5000/api/message', {
             method: 'post',
-            body: JSON.stringify({"conversation": conversation})
+            body: JSON.stringify({"conversation": conversation, "rule_text": rule_text})
         }).then(function (response) {
             return response.json();
         }).then(function (data) {
             console.log(data);
-            document.getElementById("update_div").innerHTML += conversation[conversation.length - 1] + " -> " + data["toxicity"] + "</br>"
+            document.getElementById("update_div").innerHTML += conversation[conversation.length - 1] + rule_text[rule_text.length - 1] + " -> " + data["toxicity"] + "</br>"
         });
     }
 
     const msgerForm = get(".msger-inputarea");
     const msgerInput = get(".msger-input");
     const msgerChat = get(".msger-chat");
+    const ruleForm = get(".msger-rulearea");
+    const ruleInput = get(".msger-rule");
 
     function init() {
         const msgerForm = get(".msger-inputarea");
         const msgerInput = get(".msger-input");
         const msgerChat = get(".msger-chat");
+        const ruleForm = get(".msger-rulearea");
+        const ruleInput = get(".msger-rule");
 
         document.getElementById("msgbox_id")
             .addEventListener("keyup", function (event) {
                 event.preventDefault();
                 if (event.keyCode === 13) {
                     document.getElementById("msgbtn_id").click();
+                }
+            });
+
+        document.getElementById("rulebox_id")
+            .addEventListener("keyup", function (event) {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById("rulebtn_id").click();
                 }
             });
     }
@@ -227,6 +273,15 @@
         else
             appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
         msgerInput.value = "";
+    }
+
+    function do_save_rule() {
+
+        const ruleInput = get(".msger-rule");
+        const msgRule = ruleInput.value;
+        if (!msgRule) return;
+        rule_text = msgRule;
+        ruleInput.value = rule_text;
     }
 
     function appendMessage(name, img, side, text) {
@@ -291,7 +346,10 @@
 
 
 <section class="msger">
-
+    <div class="msger-rulearea">
+        <input type="text" id = "rulebox_id" class="msger-rule" placeholder="Enter your rule...">
+        <button onclick="do_save_rule()" id = "rulebtn_id" class="msger-rule-confirm-btn">Confirm</button>
+    </div>
     <main class="msger-chat">
         <!--        <div class="msg left-msg">-->
         <!--            <div-->
