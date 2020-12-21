@@ -125,9 +125,9 @@ def toxicity(conversation, rule_text):
         return 0
     if len(pairs) < 2:
         pairs = [pairs[-1]] + [copy.deepcopy(pairs[-1])] + [copy.deepcopy(pairs[-1])]
-    forecasts_df = evaluateDataset(pairs, encoder, context_encoder, predictor, voc, 64, device)
-    print(forecasts_df.to_dict()['score'], pairs[-1])
-    return forecasts_df.to_dict()['score'][pairs[-1][-1]]
+    forecasts_df  = evaluateDataset(pairs, encoder, context_encoder, predictor, voc, 64, device)
+    print(forecasts_df.to_dict()['prediction'], pairs[-1])
+    return forecasts_df.to_dict()['prediction'][pairs[-1][-2]]
 
 
 def cli():

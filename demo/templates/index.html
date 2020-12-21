@@ -158,10 +158,10 @@
 
     .msger-rule-confirm-btn {
         margin-left: 10px;
-        background: rgb(0, 196, 65);
-        color: #fff;
-        font-weight: bold;
-        cursor: pointer;
+        /*background: rgb(0, 196, 65);*/
+        /*color: #fff;*/
+        /*font-weight: bold;*/
+        /*cursor: pointer;*/
         transition: background 0.23s;
     }
 
@@ -213,7 +213,8 @@
 
     function get_toxic() {
         conversation.push(document.getElementById("inp_box").value);
-        rule_text = document.getElementById("rule_box").value;
+        rule_text = document.getElementById("rulebox_id").value;
+        alert(rule_text);
         fetch('http://127.0.0.1:5000/api/message', {
             method: 'post',
             body: JSON.stringify({"conversation": conversation, "rule_text": rule_text})
@@ -250,9 +251,21 @@
             .addEventListener("keyup", function (event) {
                 event.preventDefault();
                 if (event.keyCode === 13) {
-                    document.getElementById("rulebtn_id").click();
+                        update_all();
                 }
             });
+    }
+
+    function update_all() {
+        oldConversation = conversation;
+        conversation = [];
+        const msgerChat = get(".msger-chat");
+        msgerChat.innerHTML = '';
+        for (i = 0; i < oldConversation.length; i++) {
+            console.log(oldConversation[i]);
+            currMsg = oldConversation[i];
+            do_add(currMsg)
+        }
     }
 
     // Icons made by Freepik from www.flaticon.com
@@ -262,12 +275,15 @@
     const PERSON_NAME = "Raju";
 
 
-    function do_add() {
+    function do_add(currMsg = null) {
 
         const msgerInput = get(".msger-input");
         const msgerChat = get(".msger-chat");
-        const msgText = msgerInput.value;
+        let msgText = msgerInput.value;
+        if (currMsg)
+            msgText = currMsg;
         if (!msgText) return;
+
         if (conversation.length % 2 == 0)
             appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
         else
@@ -277,18 +293,19 @@
 
     function do_save_rule() {
 
-        const ruleInput = get(".msger-rule");
-        const msgRule = ruleInput.value;
-        if (!msgRule) return;
-        rule_text = msgRule;
-        ruleInput.value = rule_text;
+        // const ruleInput = get(".msger-rule");
+        // const msgRule = ruleInput.value;
+        // if (!msgRule) return;
+        // rule_text = msgRule;
+        // ruleInput.value = rule_text;
     }
 
     function appendMessage(name, img, side, text) {
         conversation.push(text);
+        rule_text = document.getElementById("rulebox_id").value;
         fetch('http://127.0.0.1:5000/api/message', {
             method: 'post',
-            body: JSON.stringify({"conversation": conversation})
+            body: JSON.stringify({"conversation": conversation, 'rule_text' : rule_text})
         }).then(function (response) {
             return response.json();
         }).then(function (data) {
@@ -347,8 +364,8 @@
 
 <section class="msger">
     <div class="msger-rulearea">
+        <h1 id = "rulebtn_id" class="msger-rule-confirm-btn">Rule : </h1>
         <input type="text" id = "rulebox_id" class="msger-rule" placeholder="Enter your rule...">
-        <button onclick="do_save_rule()" id = "rulebtn_id" class="msger-rule-confirm-btn">Confirm</button>
     </div>
     <main class="msger-chat">
         <!--        <div class="msg left-msg">-->

@@ -1,0 +1,27 @@
+{
+  "subreddits": {
+    "Coronavirus": [
+      "incivility",
+      "politics"
+    ]
+  },
+  "rules": {
+    "incivility": [
+      "Incivility isn’t allowed on this sub. We want to encourage a respectful discussion.",
+      "Remain civil towards other users, no expressions of ableism, homophobia, racism, sexism, transphobia, gendered slurs, ethnic slurs, slurs referring to disabilities and slurs against LGBT",
+      "No trolling, hate speech, derogatory slurs, and personal attacks.",
+      "Personal attacks, insults, racial, homophobic, xenophobic, and sexist are not allowed",
+      "Discrimination of any kind is not ok. No slurs or hate speech. Don't be a Jerk. Don't be Rude or Condescending. No trolling, personal attacks",
+      "Stay respectful, polite, and friendly. No bigoted slurs, directed at other users. Don't insult people"
+    ],
+    "politics": [
+      "Purely political posts and comments will be removed",
+      "No political debate",
+      "Political discussion is not acceptable",
+      "Comments cannot be inherently political, attempts to derail will be removed",
+      "No political opinions or hot takes or sensationalist controversies or tweets from president",
+      "Off topic political, policy, and economic posts and comments will be removed",
+      "Shaming campaigns, politician's take or political opinion pieces are not allowed"
+    ]
+  }
+}
